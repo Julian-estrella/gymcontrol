@@ -103,6 +103,14 @@
                                         <i class="fa-solid fa-ban"></i>
                                     </button>
                                 </form>
+                                <form action="{{ route('admin.client-memberships.deactivate', $membership->id) }}" method="POST" class="inline ml-2">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="text-yellow-500 hover:text-yellow-800 text-xs" title="Desactivar membresía"
+                                        onclick="return confirm('¿Desactivar esta membresía?')">
+                                        <i class="fa-solid fa-pause"></i>
+                                    </button>
+                                </form>
                                 @endif
                             </div>
                         </div>

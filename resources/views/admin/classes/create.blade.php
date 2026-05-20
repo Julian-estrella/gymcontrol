@@ -132,7 +132,7 @@ const DAY_ORDER = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','D
 let selectedDays = {}; // { day: {start, end} }
 
 // Init from old() if validation failed
-const oldSchedule = @json(old('schedule') ? json_decode(old('schedule'), true) : []);
+const oldSchedule = @json(is_array(old('schedule')) ? old('schedule') : (old('schedule') ? json_decode(old('schedule'), true) : []));
 if (Array.isArray(oldSchedule) && oldSchedule.length > 0) {
     oldSchedule.forEach(item => {
         selectedDays[item.day] = { start: item.start, end: item.end };

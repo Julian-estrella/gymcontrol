@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePaymentRequest;
 use App\Models\Client;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
@@ -41,16 +42,9 @@ class PaymentController extends Controller
         return view('admin.payments.create', compact('clients', 'plans', 'selectedClient'));
     }
 
-    public function store(Request $request)
+    public function store(StorePaymentRequest $request)
     {
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'membership_plan_id' => 'required|exists:membership_plans,id',
-            'amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,card,transfer,other',
-            'status' => 'required|in:paid,pending,cancelled',
-            'notes' => 'nullable|string',
-        ]);
+        $data = $request->validated();
 
         $data['registered_by'] = auth()->id();
         
@@ -113,10 +107,29 @@ class PaymentController extends Controller
     {
         $payment->update(['status' => 'cancelled']);
 
+        // If this payment was linked to a membership, cancel it too
+        if ($payment->client_membership_id) {
+            $membership = \App\Models\ClientMembership::find($payment->client_membership_id);
+            if ($membership && $membership->status === 'activo') {
+                $membership->update(['status' => 'cancelado']);
+
+                $client = $membership->client;
+                // If the client no longer has any active memberships, update their status
+                if (!$client->clientMemberships()->where('status', 'activo')->exists()) {
+                    $client->update(['membership_status' => 'sin_membresia']);
+
+                    $client->membershipHistories()->create([
+                        'status'       => 'sin_membresia',
+                        'observations' => 'Membresía cancelada al anular el pago folio ' . $payment->folio,
+                    ]);
+                }
+            }
+        }
+
         session()->flash('swal', [
-            'icon' => 'warning',
+            'icon'  => 'warning',
             'title' => 'Pago cancelado',
-            'text' => 'El pago ha sido marcado como cancelado.'
+            'text'  => 'El pago ha sido marcado como cancelado y su membresía asociada fue cancelada.',
         ]);
 
         return back();

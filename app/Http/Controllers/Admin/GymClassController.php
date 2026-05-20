@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreGymClassRequest;
+use App\Http\Requests\UpdateGymClassRequest;
 use App\Models\GymClass;
 use App\Models\Trainer;
 use Illuminate\Http\Request;
@@ -21,28 +23,16 @@ class GymClassController extends Controller
         return view('admin.classes.create', compact('trainers'));
     }
 
-    public function store(Request $request)
+    public function store(StoreGymClassRequest $request)
     {
-        $request->validate([
-            'name'         => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'trainer_id'   => 'nullable|exists:trainers,id',
-            'schedule'     => 'required|string',
-            'max_capacity' => 'required|integer|min:1',
-        ]);
-
-        // Decode and validate schedule JSON
-        $scheduleData = json_decode($request->schedule, true);
-        if (empty($scheduleData)) {
-            return back()->withErrors(['schedule' => 'Debes seleccionar al menos un día con horario.'])->withInput();
-        }
+        $data = $request->validated();
 
         GymClass::create([
-            'name'         => $request->name,
-            'description'  => $request->description,
-            'trainer_id'   => $request->trainer_id,
-            'schedule'     => $scheduleData,
-            'max_capacity' => $request->max_capacity,
+            'name'         => $data['name'],
+            'description'  => $data['description'] ?? null,
+            'trainer_id'   => $data['trainer_id'],
+            'schedule'     => $data['schedule'],
+            'max_capacity' => $data['max_capacity'],
             'is_active'    => $request->boolean('is_active', true),
         ]);
 
@@ -74,27 +64,16 @@ class GymClassController extends Controller
         return view('admin.classes.edit', compact('class', 'trainers'));
     }
 
-    public function update(Request $request, GymClass $class)
+    public function update(UpdateGymClassRequest $request, GymClass $class)
     {
-        $request->validate([
-            'name'         => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'trainer_id'   => 'nullable|exists:trainers,id',
-            'schedule'     => 'required|string',
-            'max_capacity' => 'required|integer|min:1',
-        ]);
-
-        $scheduleData = json_decode($request->schedule, true);
-        if (empty($scheduleData)) {
-            return back()->withErrors(['schedule' => 'Debes seleccionar al menos un día con horario.'])->withInput();
-        }
+        $data = $request->validated();
 
         $class->update([
-            'name'         => $request->name,
-            'description'  => $request->description,
-            'trainer_id'   => $request->trainer_id,
-            'schedule'     => $scheduleData,
-            'max_capacity' => $request->max_capacity,
+            'name'         => $data['name'],
+            'description'  => $data['description'] ?? null,
+            'trainer_id'   => $data['trainer_id'],
+            'schedule'     => $data['schedule'],
+            'max_capacity' => $data['max_capacity'],
             'is_active'    => $request->boolean('is_active'),
         ]);
 

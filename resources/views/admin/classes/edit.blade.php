@@ -133,7 +133,7 @@ const DAY_ORDER = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','D
 let selectedDays = {};
 
 // Load existing schedule from model
-const existingSchedule = @json(old('schedule') ? json_decode(old('schedule'), true) : ($class->schedule ?? []));
+const existingSchedule = @json(is_array(old('schedule')) ? old('schedule') : (old('schedule') ? json_decode(old('schedule'), true) : ($class->schedule ?? [])));
 
 if (Array.isArray(existingSchedule)) {
     existingSchedule.forEach(item => {

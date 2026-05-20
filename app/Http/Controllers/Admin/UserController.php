@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,15 +38,9 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:15',
-            'role' => 'required|in:' . User::ROLE_ADMIN . ',' . User::ROLE_STAFF . ',' . User::ROLE_CLIENTE,
-        ]);
+        $data = $request->validated();
 
         $data['password'] = bcrypt($data['password']);
         $data['is_active'] = true;
@@ -82,22 +78,15 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:15',
-            'role' => 'required|in:' . User::ROLE_ADMIN . ',' . User::ROLE_STAFF . ',' . User::ROLE_CLIENTE,
-            'is_active' => 'boolean',
-        ]);
+        $data = $request->validated();
 
         // Si el usuario quiere editar contraseña
         if ($request->filled('password')) {
-            $request->validate([
-                'password' => 'required|string|min:8|confirmed',
-            ]);
             $data['password'] = bcrypt($request->password);
+        } else {
+            unset($data['password']);
         }
 
         // Si no viene is_active es porque el checkbox no se marcó (false)

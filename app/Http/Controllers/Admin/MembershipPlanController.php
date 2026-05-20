@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMembershipPlanRequest;
+use App\Http\Requests\UpdateMembershipPlanRequest;
 use App\Models\MembershipPlan;
 use Illuminate\Http\Request;
 
@@ -19,15 +21,9 @@ class MembershipPlanController extends Controller
         return view('admin.membership-plans.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreMembershipPlanRequest $request)
     {
-        $data = $request->validate([
-            'name'          => 'required|string|max:255',
-            'description'   => 'nullable|string',
-            'duration_days' => 'required|integer|min:1',
-            'price'         => 'required|numeric|min:0',
-            'is_active'     => 'boolean',
-        ]);
+        $data = $request->validated();
 
         $data['is_active'] = $request->boolean('is_active', true);
         MembershipPlan::create($data);
@@ -46,15 +42,9 @@ class MembershipPlanController extends Controller
         return view('admin.membership-plans.edit', compact('membershipPlan'));
     }
 
-    public function update(Request $request, MembershipPlan $membershipPlan)
+    public function update(UpdateMembershipPlanRequest $request, MembershipPlan $membershipPlan)
     {
-        $data = $request->validate([
-            'name'          => 'required|string|max:255',
-            'description'   => 'nullable|string',
-            'duration_days' => 'required|integer|min:1',
-            'price'         => 'required|numeric|min:0',
-            'is_active'     => 'boolean',
-        ]);
+        $data = $request->validated();
 
         $data['is_active'] = $request->boolean('is_active');
         $membershipPlan->update($data);

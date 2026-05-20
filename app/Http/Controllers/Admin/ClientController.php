@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreClientRequest;
+use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,15 +24,9 @@ class ClientController extends Controller
         return view('admin.clients.create', compact('users'));
     }
 
-    public function store(Request $request)
+    public function store(StoreClientRequest $request)
     {
-        $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:15',
-            'membership_status' => 'required|in:activo,vencido,sin_membresia',
-        ]);
+        $data = $request->validated();
 
         $client = Client::create($data);
 
@@ -68,16 +64,9 @@ class ClientController extends Controller
         return view('admin.clients.edit', compact('client', 'users'));
     }
 
-    public function update(Request $request, Client $client)
+    public function update(UpdateClientRequest $request, Client $client)
     {
-        $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:15',
-            'membership_status' => 'required|in:activo,vencido,sin_membresia',
-            'observations' => 'nullable|string' // Para el historial
-        ]);
+        $data = $request->validated();
 
         $oldStatus = $client->membership_status;
         $client->update([

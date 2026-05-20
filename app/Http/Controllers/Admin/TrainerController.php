@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTrainerRequest;
+use App\Http\Requests\UpdateTrainerRequest;
 use App\Models\Trainer;
 use Illuminate\Http\Request;
 
@@ -19,15 +21,9 @@ class TrainerController extends Controller
         return view('admin.trainers.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreTrainerRequest $request)
     {
-        $data = $request->validate([
-            'name'      => 'required|string|max:255',
-            'email'     => 'required|email|max:255|unique:trainers,email',
-            'phone'     => 'nullable|string|max:20',
-            'specialty' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
-        ]);
+        $data = $request->validated();
 
         $data['is_active'] = $request->boolean('is_active', true);
         Trainer::create($data);
@@ -52,15 +48,9 @@ class TrainerController extends Controller
         return view('admin.trainers.edit', compact('trainer'));
     }
 
-    public function update(Request $request, Trainer $trainer)
+    public function update(UpdateTrainerRequest $request, Trainer $trainer)
     {
-        $data = $request->validate([
-            'name'      => 'required|string|max:255',
-            'email'     => 'required|email|max:255|unique:trainers,email,' . $trainer->id,
-            'phone'     => 'nullable|string|max:20',
-            'specialty' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
-        ]);
+        $data = $request->validated();
 
         $data['is_active'] = $request->boolean('is_active');
         $trainer->update($data);

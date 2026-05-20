@@ -53,10 +53,12 @@ Route::middleware([
         Route::resource('membership-plans', MembershipPlanController::class);
         Route::patch('membership-plans/{membershipPlan}/toggle', [MembershipPlanController::class, 'toggle'])->name('membership-plans.toggle');
 
-        // Client Memberships (assign/cancel)
+        // Client Memberships (assign/cancel/status)
         Route::get('clients/{client}/memberships/create', [ClientMembershipController::class, 'create'])->name('client-memberships.create');
         Route::post('clients/{client}/memberships', [ClientMembershipController::class, 'store'])->name('client-memberships.store');
         Route::patch('client-memberships/{clientMembership}/cancel', [ClientMembershipController::class, 'destroy'])->name('client-memberships.cancel');
+        Route::patch('client-memberships/{clientMembership}/deactivate', [ClientMembershipController::class, 'deactivate'])->name('client-memberships.deactivate');
+        Route::patch('client-memberships/{clientMembership}/status', [ClientMembershipController::class, 'updateStatus'])->name('client-memberships.status');
 
         // Payments
         Route::resource('payments', App\Http\Controllers\Admin\PaymentController::class)->except(['edit', 'update']);
