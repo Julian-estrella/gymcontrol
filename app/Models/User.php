@@ -11,6 +11,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -92,16 +93,58 @@ class User extends Authenticatable
         return $this->role === self::ROLE_CLIENTE;
     }
 
+    public function roleRecord(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role', 'slug');
+    }
+
+    public function roleLabel(): string
+    {
+        if ($this->isAdmin()) {
+            return 'Admin';
+        }
+
+        if ($this->isStaff()) {
+            return 'Staff';
+        }
+
+        if ($this->isCliente()) {
+            return 'Cliente';
+        }
+
+        return $this->roleRecord?->name ?? ucfirst((string) $this->role);
+    }
+
+    public function canAccessAdmin(): bool
+    {
+        if ($this->isAdmin() || $this->isStaff()) {
+            return true;
+        }
+
+        return (bool) $this->roleRecord?->can_access_admin;
+    }
+
+    public function canAccessModule(string $module): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if ($this->isStaff()) {
+            return in_array($module, ['clients', 'trainers', 'classes', 'membership-plans', 'payments'], true);
+        }
+
+        $role = $this->roleRecord;
+
+        return (bool) ($role?->can_access_admin && $role->hasModule($module));
+    }
+
     /**
      * Get the dashboard route based on the user's role.
      */
     public function dashboardRoute(): string
     {
-        return match (strtolower($this->role ?? '')) {
-            self::ROLE_ADMIN   => 'admin.dashboard',
-            self::ROLE_STAFF   => 'admin.dashboard',
-            default            => 'cliente.dashboard',
-        };
+        return $this->canAccessAdmin() ? 'admin.dashboard' : 'cliente.dashboard';
     }
 
     public function client()

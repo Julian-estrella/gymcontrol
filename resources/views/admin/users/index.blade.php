@@ -42,7 +42,7 @@
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <span class="relative inline-block px-3 py-1 font-semibold text-indigo-900 leading-tight">
                         <span aria-hidden class="absolute inset-0 bg-indigo-200 opacity-50 rounded-full"></span>
-                        <span class="relative">{{ ucfirst($user->role) }}</span>
+                        <span class="relative">{{ $user->roleLabel() }}</span>
                     </span>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">

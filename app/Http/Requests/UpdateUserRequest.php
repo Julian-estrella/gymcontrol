@@ -29,7 +29,7 @@ class UpdateUserRequest extends FormRequest
             'name'      => ['required', 'string', 'min:3', 'max:100'],
             'email'     => ['required', 'email', 'max:150', Rule::unique('users')->ignore($userId)],
             'password'  => ['nullable', 'string', 'min:8', 'confirmed'],
-            'role'      => ['required', 'in:' . User::ROLE_ADMIN . ',' . User::ROLE_STAFF . ',' . User::ROLE_CLIENTE],
+            'role'      => ['required', Rule::exists('roles', 'slug')],
             'phone'     => ['nullable', 'string', 'max:15'],
             'is_active' => ['sometimes', 'boolean'],
         ];

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::with('roleRecord')->get();
         return view('admin.users.index', compact('users'));
     }
 
@@ -25,12 +26,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        // Usamos los roles definidos en el modelo en lugar de Spatie
-        $roles = [
-            User::ROLE_ADMIN => 'Admin',
-            User::ROLE_STAFF => 'Staff',
-            User::ROLE_CLIENTE => 'Cliente',
-        ];
+        $roles = Role::orderBy('name')->pluck('name', 'slug');
 
         return view('admin.users.create', compact('roles'));
     }
@@ -66,11 +62,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = [
-            User::ROLE_ADMIN => 'Admin',
-            User::ROLE_STAFF => 'Staff',
-            User::ROLE_CLIENTE => 'Cliente',
-        ];
+        $roles = Role::orderBy('name')->pluck('name', 'slug');
 
         return view('admin.users.edit', compact('user', 'roles'));
     }
